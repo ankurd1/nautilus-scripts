@@ -1,0 +1,4 @@
+#!/bin/bash
+#Author--Ankur Dahiya
+#shows hex-dump of selected file
+gnome-terminal -x bash -c "hexdump -Cv  \"$*\" | less"

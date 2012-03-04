@@ -1,0 +1,79 @@
+#!/usr/bin/python
+
+#TODO input ip from user
+#FIXME dialog titles
+#FIXME dont wait for user to press OK in case of multiple files
+
+import os
+import paramiko
+from subprocess import call, Popen, PIPE
+import sys
+from time import time
+
+
+def zenity_info(msg):
+    call(['zenity', '--info', '--text', msg])
+
+
+def zenity_error(msg):
+    call(['zenity', '--error', '--text', msg])
+
+
+zenity_progress = None
+
+
+def update_zenity_progress(bytes_trans, bytes_total):
+    if zenity_progress is None:
+        return
+    else:
+        zenity_progress.stdin.write(str((bytes_trans * 100) / bytes_total) +
+                '\n')
+
+
+def zenity_progress_init():
+    return Popen(['zenity', '--progress', '--auto-kill', '--auto-close'],
+            stdin=PIPE)
+
+
+files = sys.argv[1:]
+
+iphone_ip_pre = '192.168.1.'
+username = 'root'
+password = ''
+iphone_dir = '/var/mobile/Documents/Installous/Downloads/'
+
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+ip_end = 2
+while True:
+    try:
+        ssh.connect(iphone_ip_pre + str(ip_end), username=username,
+                password=password)
+        break
+    except Exception, e:
+        if ip_end == 5:
+            zenity_error("Could not connect!")
+            sys.exit(-1)
+        else:
+            ip_end += 1
+
+sftp = ssh.open_sftp()
+
+for fil in files:
+    fil_name = fil.split('/')[-1]
+    try:
+        zenity_progress = zenity_progress_init()
+        start_time = time()
+        sftp.put(fil, iphone_dir + fil_name,
+                callback=update_zenity_progress)
+        time_taken = time() - start_time
+        file_size = os.stat(fil).st_size
+        avg_speed = (file_size / time_taken) / 1024     # KB/s
+    except Exception, e:
+        zenity_error(str(e))
+
+    zenity_info('Successfully uploaded {0} at avg of {1:.2f}KBps.'.
+            format(fil_name, avg_speed))
+
+sftp.close()
