@@ -37,41 +37,46 @@ def zenity_progress_init():
 
 
 #read config file
-config = ConfigParser({'username': 'root', 'password': 'alpine',
-'iphone_ip': '192.168.1',
-'iphone_dir': '/var/mobile/Documents/Installous/Downloads'})
+config = ConfigParser({'username': 'root',
+'password': 'alpine',
+'device_ip': '192.168.1',
+'device_ip_start': '1',
+'device_ip_end': '5',
+'device_dir': '/var/mobile/Documents/Installous/Downloads'})
 
 config.read('SendToIphone.cfg')
 
-iphone_ip = config.get('main', 'iphone_ip')
+device_ip = config.get('main', 'device_ip')
 username = config.get('main', 'username')
 password = config.get('main', 'password')
-iphone_dir = config.get('main', 'iphone_dir')
+device_dir = config.get('main', 'device_dir')
+device_ip_start = config.getint('main', 'device_ip_start')
+device_ip_end = config.getint('main', 'device_ip_end')
 
 files = sys.argv[1:]
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-if (len(iphone_ip.split('.')) == 4):
+if (len(device_ip.split('.')) == 4):
     try:
-        ssh.connect(iphone_ip, username=username, password=password)
+        ssh.connect(device_ip, username=username, password=password)
     except Exception, e:
         zenity_error("Could not connect!")
         sys.exit(-1)
 else:
-    ip_end = 2
+    ip_suff = device_ip_start
     while True:
         try:
-            ssh.connect(iphone_ip + "." + str(ip_end), username=username,
+            ssh.connect(device_ip + "." + str(ip_suff), username=username,
                     password=password)
             break
         except Exception, e:
-            if ip_end == 5:
+            if ip_suff == device_ip_end:
                 zenity_error("Could not connect!")
                 sys.exit(-1)
             else:
-                ip_end += 1
+                ip_suff += 1
 
 sftp = ssh.open_sftp()
 
@@ -80,7 +85,7 @@ for fil in files:
     try:
         zenity_progress = zenity_progress_init()
         start_time = time()
-        sftp.put(fil, iphone_dir + fil_name,
+        sftp.put(fil, device_dir + fil_name,
                 callback=update_zenity_progress)
         time_taken = time() - start_time
         file_size = os.stat(fil).st_size

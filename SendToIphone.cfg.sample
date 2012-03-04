@@ -1,0 +1,22 @@
+[main]
+#Rename this file to SendToIphone.cfg to use it.
+#The following values are the default ones. If any of these is not present
+#or if the whole file is absent, these values will be used.
+
+#Username/Password to login to your device.
+username = root
+password = alpine
+
+#The target directory, where the file should be uploaded.
+#The default is the installous downloads directory.
+device_dir = '/var/mobile/Documents/Installous/Downloads'
+
+#The ip_address of the device
+#You can specify a complete ip_address like 192.168.1.2
+#or you can specify only the first 3 numbers, like 192.168.1
+#the script will then scan for the iphone in the ip-range
+#192.168.1.device_ip_start - 192.168.1.device_ip_end
+#The default behaviour is search in 192.168.1.1 - 192.168.1.5
+device_ip = 192.168.1
+device_ip_start = 1
+device_ip_end = 5

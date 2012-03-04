@@ -1,0 +1,27 @@
+A set of nautilus scripts that I wrote for daily use!
+Copy these files to your nautilus-scripts folder and make them executable.
+For ubuntu, this folder is ~/.gnome2/nautilus-scripts.
+
+Now, just right click on any file in nautilus and choose one of the scripts
+to execute!
+
+convert_to_mp3.py
+----------------
+Converts the selected files to mp3.
+Dependancies: ffmpeg
+
+Hex Dump
+--------
+Shows a hex dump of the file.
+
+SendToIphone
+------------
+Sends the selected file to your iphone/ipod/ipad over wifi.
+Needs a jailbroken device with openssh installed.
+
+A typical use case is to send an ipa file to the installous directory! ;)
+
+Uses a config file to store configuration options. Refer to 
+SendToIphone.cfg.sample to understand what the options do.
+
+Dependencies: zenity, paramiko
