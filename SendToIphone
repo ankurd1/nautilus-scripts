@@ -9,6 +9,7 @@ import paramiko
 from subprocess import call, Popen, PIPE
 import sys
 from time import time
+from ConfigParser import ConfigParser
 
 
 def zenity_info(msg):
@@ -35,28 +36,42 @@ def zenity_progress_init():
             stdin=PIPE)
 
 
-files = sys.argv[1:]
+#read config file
+config = ConfigParser({'username': 'root', 'password': 'alpine',
+'iphone_ip': '192.168.1',
+'iphone_dir': '/var/mobile/Documents/Installous/Downloads'})
 
-iphone_ip_pre = '192.168.1.'
-username = 'root'
-password = ''
-iphone_dir = '/var/mobile/Documents/Installous/Downloads/'
+config.read('SendToIphone.cfg')
+
+iphone_ip = config.get('main', 'iphone_ip')
+username = config.get('main', 'username')
+password = config.get('main', 'password')
+iphone_dir = config.get('main', 'iphone_dir')
+
+files = sys.argv[1:]
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-ip_end = 2
-while True:
+if (len(iphone_ip.split('.')) == 4):
     try:
-        ssh.connect(iphone_ip_pre + str(ip_end), username=username,
-                password=password)
-        break
+        ssh.connect(iphone_ip, username=username, password=password)
     except Exception, e:
-        if ip_end == 5:
-            zenity_error("Could not connect!")
-            sys.exit(-1)
-        else:
-            ip_end += 1
+        zenity_error("Could not connect!")
+        sys.exit(-1)
+else:
+    ip_end = 2
+    while True:
+        try:
+            ssh.connect(iphone_ip + str(ip_end), username=username,
+                    password=password)
+            break
+        except Exception, e:
+            if ip_end == 5:
+                zenity_error("Could not connect!")
+                sys.exit(-1)
+            else:
+                ip_end += 1
 
 sftp = ssh.open_sftp()
 
