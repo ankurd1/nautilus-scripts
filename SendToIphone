@@ -44,7 +44,8 @@ config = ConfigParser({'username': 'root',
 'device_ip_end': '5',
 'device_dir': '/var/mobile/Documents/Installous/Downloads'})
 
-config.read('SendToIphone.cfg')
+config.read('/home/' + os.environ['USERNAME'] +
+'/.gnome2/nautilus-scripts/SendToIphone.cfg')
 
 device_ip = config.get('main', 'device_ip')
 username = config.get('main', 'username')
